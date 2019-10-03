@@ -1,0 +1,32 @@
+div, section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > * {
+        flex: 1 1 auto;
+        padding: 1em;
+        margin: 1em;
+    }
+}
+div {
+    flex-direction: column;
+}
+button {
+    border: 1px solid $color3;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+    color: $color1;
+    border-radius: 3px;
+    &:focus {
+        outline: none;
+        box-shadow: none;
+    }
+    &:hover {
+        background: $color3;
+    }
+}
+
+.cursor {
+    cursor: pointer;
+}
