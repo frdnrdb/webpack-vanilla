@@ -10,8 +10,8 @@ const style = {
     reset: '\x1b[0m'
 };
 
-const s3Folder = pkg.name || new Date().toLocaleString().replace(/[/,\s:]/g, '-'); // 02-10-2019--13-51-47
-const s3DeployedUrl = s3.getPublicUrlHttp(process.env.S3_BUCKET, s3Folder).replace('http', 'https');
+const s3Folder = () => pkg.name || new Date().toLocaleString().replace(/[/,\s:]/g, '-'); // 02-10-2019--13-51-47
+const s3DeployedUrl = () => s3.getPublicUrlHttp(process.env.S3_BUCKET, s3Folder()).replace('http', 'https') + '/index.html';
 
 const deployS3 = () => new Promise(resolve => {
 
@@ -29,19 +29,18 @@ const deployS3 = () => new Promise(resolve => {
         s3Params: {
             Bucket: process.env.S3_BUCKET,
             ACL: 'public-read',
-            Prefix: s3Folder + '/'
+            Prefix: s3Folder() + '/'
         },
         getS3Params: (localFile, _, callback) => {
             callback(false, !/DS_Store/.test(localFile));
         }
     });
 
-    console.log('Uploading to S3');
     uploader.on('error', console.log.bind(this, 'error'));
     uploader.on('progress', () => process.stdout.write('.'));
     uploader.on('end', () => {
         console.log(`\n\n${style.cyanF}deployed ${style.cyanB + style.blackF} ${pkg.name} ${style.reset} ${style.cyanF}on AWS S3:${style.reset}`);
-        console.log(s3DeployedUrl+ '\n');
+        console.log(s3DeployedUrl() + '\n');
         resolve();
     });
 });
@@ -55,7 +54,7 @@ const stripMarkup = html => {
     const stripped = html.replace(/<\s?(link|script)(?!.*icon)[^>]+>(([^<]+)?<\/(link|script)>)?/g, m => {
         dependencies.push(
             m.replace(/((?:src|href)="?)(?!https?:\/\/)((?:[.\/]+)?([^">]+))/g, (_, attr, __, file)=>{
-                return attr + s3DeployedUrl + '/' + file;
+                return attr + s3DeployedUrl() + '/' + file;
             })
         );
         return '';
@@ -110,27 +109,24 @@ const deployMM = () => new Promise(resolve => {
 });
 
 function deploy() {
+    console.log(`\x1Bc\n\x1b[33mDeploying ${pkg.name}\x1b[0m`);
     const [ , , flag ] = process.argv;
     deployS3().then(() => flag === '--mm' && deployMM());
 }
 
-console.log('\x1Bc'); // clear console
+const defaultPackageName = __dirname.split('/').pop();
 
 if (pkg.name === 'everyday-vanilla') {
-    let changed;
-    process.stdout.write('\n\x1b[33mChange package name:\x1b[0m ');
+    process.stdout.write(`\x1Bc\x1b[33mChange package name\x1b[0m [${defaultPackageName}]: `);
     process.openStdin().addListener('data', buffer => {
         const input = buffer.toString();
-        if (!changed) {
-            if (input.charCodeAt(0) === 10) {
-                process.stdin.destroy();
-                console.log('\n\x1b[31m--- NAME IS MANDATORY ---\x1b[0m\n');
-                return;
-            }
-            pkg.name = input.trim();
-            fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2), 'utf8');
-            deploy();
-        } 
+        pkg.name = input.charCodeAt(0) === 10 ? defaultPackageName : input.trim();
+        if (pkg.name.length < 3) {
+            console.log('\n\x1b[31m--- NAME TOO SHORT ---\x1b[0m\n');
+            process.exit(1);
+        }
+        fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2), 'utf8');
+        deploy();
     });    
 }
 else deploy();

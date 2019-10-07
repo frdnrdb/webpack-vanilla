@@ -1,3 +1,7 @@
+:root {
+    --color-bg: #fff;
+}
+
 div, section {
     display: flex;
     justify-content: center;
@@ -12,18 +16,9 @@ div {
     flex-direction: column;
 }
 button {
-    border: 1px solid $color3;
-    outline: none;
-    box-shadow: none;
-    background: transparent;
-    color: $color1;
-    border-radius: 3px;
-    &:focus {
-        outline: none;
-        box-shadow: none;
-    }
     &:hover {
-        background: $color3;
+        color: var(--color-bg);
+        background: $color-dark;
     }
 }
 

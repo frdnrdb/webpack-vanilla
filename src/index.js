@@ -4,31 +4,31 @@ import { qs, create, state } from 'ljsy';
 const root = qs('#root');
 
 const div = create('div', root, {
-    innerHTML: 'test fest',
-    style: {
-        border: '10px solid gold'
-    },
+    innerHTML: '<b></b>',
     children: [
         {
             type: 'button',
-            innerHTML: 'italic',
+            innerHTML: 'click',
             on: {
-                click: e => {
-                    e.target.parentElement.style.border = '10px solid ' + getRandomColor();
-                }
+                click: bgColor
             }        
         }
     ]
 });
 
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    return Array(6).fill().reduce(c => c + letters[Math.floor(Math.random() * 16)], '#');
+function bgColor() {
+    const col = randomColor();
+    document.body.style.background = col;
+    document.documentElement.style.setProperty('--color-bg', col);
+}
+
+function randomColor() {
+    return Array(6).fill().reduce(c => c + '0123456789ABCDEF'[Math.floor(Math.random() * 16)], '#');
 }
 
 const object = { propertyName: 'thing' };
 
-state.attach('test', 'init', [
+state.attach('test', 'test fest', [
     [ create('input', div), 'value', 'keyup' ],
     [ div.children[0], 'innerHTML' ],
     [ object, 'propertyName' ]
