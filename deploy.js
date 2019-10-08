@@ -11,7 +11,7 @@ const style = {
 };
 
 const s3Folder = () => pkg.name || new Date().toLocaleString().replace(/[/,\s:]/g, '-'); // 02-10-2019--13-51-47
-const s3DeployedUrl = () => s3.getPublicUrlHttp(process.env.S3_BUCKET, s3Folder()).replace('http', 'https') + '/index.html';
+const s3DeployedUrl = () => s3.getPublicUrlHttp(process.env.S3_BUCKET, s3Folder()).replace('http', 'https');
 
 const deployS3 = () => new Promise(resolve => {
 
@@ -40,7 +40,7 @@ const deployS3 = () => new Promise(resolve => {
     uploader.on('progress', () => process.stdout.write('.'));
     uploader.on('end', () => {
         console.log(`\n\n${style.cyanF}deployed ${style.cyanB + style.blackF} ${pkg.name} ${style.reset} ${style.cyanF}on AWS S3:${style.reset}`);
-        console.log(s3DeployedUrl() + '\n');
+        console.log(s3DeployedUrl() + '/index.html' + '\n');
         resolve();
     });
 });
@@ -111,7 +111,7 @@ const deployMM = () => new Promise(resolve => {
 function deploy() {
     console.log(`\x1Bc\n\x1b[33mDeploying ${pkg.name}\x1b[0m`);
     const [ , , flag ] = process.argv;
-    deployS3().then(() => flag === '--mm' && deployMM());
+    deployS3().then(() => flag === '--mm' ? deployMM() : process.exit());
 }
 
 const defaultPackageName = __dirname.split('/').pop();
