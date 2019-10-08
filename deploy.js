@@ -85,8 +85,13 @@ const deployMM = () => new Promise(resolve => {
             .then(res => res.json())
             .then(json => {
 
-                const diff = json.id && integrationId && (integrationId || json.id);
-                if (diff) integrationId = false;
+                if (json.update) {
+                    json.id = json.update.id;
+                }
+
+                if (json.id && integrationId && (integrationId !== json.id)) {
+                    integrationId = false;
+                }
 
                 if (!json.id || (json.update && json.update.deleted)) {
                     integrationId = false;

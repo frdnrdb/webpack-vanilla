@@ -43,6 +43,6 @@
     "write-file-webpack-plugin": "^4.5.1"
   },
   "dependencies": {
-    "ljsy": "^1.0.4"
+    "ljsy": "^1.0.5"
   }
 }
